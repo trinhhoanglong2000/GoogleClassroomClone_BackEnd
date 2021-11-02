@@ -14,7 +14,7 @@ app.use(cors());
 
 app.use('/classes',classesRoutes);
 app.get('/',(req,res)=>{
-    res.send('Hello')
+    res.send('Hello, this is backend server hosting for GoogleClone project')
 })
 const CONNECTION_URL= `mongodb+srv://longdien0098:longdien0098@cluster0.2uaet.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`
 const PORT =process.env.PORT || 5000;
