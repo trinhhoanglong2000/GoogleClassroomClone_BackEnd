@@ -8,6 +8,7 @@ const cors = require('cors')
 
 const indexRouter = require('./routes/index');
 const classesRouter = require('./api/classes');
+const mailRouter = require('./api/mail');
 const app = express();
 
 // view engine setup
@@ -23,6 +24,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/classes', classesRouter);
+app.use('/mail', mailRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
