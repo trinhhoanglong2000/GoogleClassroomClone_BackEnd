@@ -1,37 +1,10 @@
-const mysql = require('mysql')
-exports.connectionInfo ={
-  // host: 'localhost',
-  // user: 'root',
-  // password: 'mysql',
-  // database: 'classroomdb'
-  host: 'sql6.freemysqlhosting.net',
-  user: 'sql6448526',
-  password: 'IFmrHRw646',
-  database: 'sql6448526'
-}
 
-exports.createConnection = () => {
-  return mysql.createConnection(this.connectionInfo)
-}
-
-exports.connectDB = (connection) => {
-  connection.connect(function(err) {
-    if (!!err)
-    { 
-      console.log("Database connect error!!!");
-    } 
-    else
-    {
-      console.log("Database is connected!!!");
-    }
-  });
-}
-exports.disconnectDB = (connection) =>{
-  connection.end (function(err){
-    if (!err){
-      console.log("close db")
-    }
-  })
-}
-
-
+const Pool = require("pg").Pool
+const poolean = new Pool({
+  user: 'postgres', 
+  password: '12345678',
+  database: 'postgres',
+  host: 'database-2-instance-1.c7sn8vv4zz9k.us-east-1.rds.amazonaws.com',
+  port: 5432
+})
+module.exports = poolean
