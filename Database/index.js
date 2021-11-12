@@ -1,10 +1,10 @@
 
 const Pool = require("pg").Pool
 const poolean = new Pool({
-  user: 'postgres', 
-  password: '12345678',
-  database: 'postgres',
-  host: 'database-2-instance-1.c7sn8vv4zz9k.us-east-1.rds.amazonaws.com',
+  user: process.env.DB_USERNAME, 
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE,
+  host: process.env.DB_HOST,
   port: 5432
 })
 module.exports = poolean

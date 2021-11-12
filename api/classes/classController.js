@@ -4,6 +4,7 @@ const { v4: uuidv4 } = require('uuid');
 const classService = require("./classService");
 
 exports.getAllClasses = async (req, res) => {
+  console.log(uuidv4())
   try {
     
     const allData = await poolean.query("SELECT * FROM \"Classes\"")
@@ -49,21 +50,22 @@ exports.addClass = async function (req, res) {
       message: 'Recheck your submit information'
     })
   }
-  // if (classInfo.className && classInfo.teacherName && classInfo.quantity) {
-  //   classService.addClass(classInfo, InsertResuil => {
-  //     if (InsertResuil === 200) {
-  //       res.header({ "Access-Control-Allow-Origin": "*" });
-  //       res.status(InsertResuil).json("Add new class successful!!!")
-  //     }
-  //     else {
-  //       res.header({ "Access-Control-Allow-Origin": "*" });
-  //       res.status(404).json("Error")
-  //     }
-
-  //   })
-  // } else {
-  //   res.header({ "Access-Control-Allow-Origin": "*" });
-  //   res.status(400).json("Recheck your submit information")
-  // }
 }
-
+exports.addClassesAccount = async function (req, res) {
+  const classInfo = req.body;
+  console.log(classInfo)
+  console.log(uuidv4())
+  try {
+    const classItem = await poolean.query(`
+    INSERT INTO classesaccount (classid, accountid, type)
+    VALUES ($1, $2, $3)
+    RETURNING *
+    `,[classInfo.classId,classInfo.accountId,classInfo.type])
+  res.status(200).json(classItem.rows);
+  } catch (err) {
+    res.status(404).json({
+      message: 'Recheck your submit information'
+    })
+  }
+}
+ 
