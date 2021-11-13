@@ -7,8 +7,6 @@ const { v4: uuidv4 } = require('uuid');
 //router.get('/', classController.getAllClasses);
 router.get('/', classController.getAllClasses)
 router.get('/:id', classController.detail);
-
 router.post('/addClass', classController.addClass)
-
 router.post('/addAccount', classController.addClassesAccount)
 module.exports = router;
