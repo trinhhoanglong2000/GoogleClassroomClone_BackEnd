@@ -43,7 +43,7 @@ exports.addClass = async function (req, res) {
     INSERT INTO \"Classes\" (id, name, section, subject, room)
     VALUES ($1, $2, $3, $4, $5)
     RETURNING *
-    `,[classInfo.id,classInfo.name,classInfo.section,classInfo.subject,classInfo.room])
+    `,[uuidv4(),classInfo.name,classInfo.section,classInfo.subject,classInfo.room])
   res.status(200).json(classItem.rows);
   } catch (err) {
     res.status(404).json({
