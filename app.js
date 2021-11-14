@@ -6,11 +6,17 @@ const logger = require('morgan');
 const cors = require('cors')
 
 require('dotenv').config()
+passport = require('./authentication/index')
 
 const indexRouter = require('./routes/index');
 const classesRouter = require('./api/classes');
 const mailRouter = require('./api/mail');
+const loginRouter = require('./api/Login');
+const registerRouter = require('./api/Register');
+
+
 const app = express();
+app.use(passport.initialize());
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -26,6 +32,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/classes', classesRouter);
 app.use('/mail', mailRouter);
+app.use('/login',loginRouter);
+app.use('/register',registerRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
