@@ -42,11 +42,11 @@ exports.SendMail = (req, res) =>
     });
 }
 
-//Trả về cái accessToken
+//Trả về cái giá trị cho query accessToken với class 
 exports.CreateInviteLink = (req,res) => {
     const JWS = generateJWTByClassId("2d85b90e-64ae-4db7-b7ab-68b479086ca6");
     if (JWS){
-        res.status(200).json(JWS)
+        res.status(200).json("localhost:5000/mail/AccessInviteLink?accessToken=" + JWS)
     }else{
         res.status(404).json("Error")
     }
@@ -68,54 +68,61 @@ function generateJWTByClassId (classId){
 //localhost:5000/mail/AccessInviteLink?accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGFzc0lkIjoiMmQ4NWI5MGUtNjRhZS00ZGI3LWI3YWItNjhiNDc5MDg2Y2E2IiwiaWF0IjoxNjM2ODg0OTM4LCJleHAiOjE2MzY4ODg1Mzh9.AzJJGJXspGBHCEpHQAVOBOAh-GFYKllVhTA-WHeeBsg&=
 
 exports.AccessInviteLink =async (req,res) =>{
+
     //Thay user ID ở đây nhe
     const UserID = "b84f3ff8-a84d-4ba6-9942-c5c8654b2ed0"
-    
+    var decoded = ""
     var dateNow = new Date();
-    var decoded = jwt_decode(req.query.accessToken);
+    //Chứa classid và time hết hạn
+    try{
+         decoded = jwt.verify(req.query.accessToken, process.env.INVITER_SECRET_TOKEN);
+    }catch(err){
+        res.status(404).json({
+            message: 'Access Token Wrong'
+        })
+    }
     isExpiredToken = false
     if(parseFloat(decoded.exp) < parseFloat(dateNow.getTime()/1000))
     {
         isExpiredToken = true;
     }
-
     if (isExpiredToken){
-        res.status(404).json("Expired Token");
+        res.status(404).json("expired or wrong token");
     }else{
-        
         try {
             const classItem = await poolean.query(`
-          SELECT * 
-          FROM \"Classes\"
-          WHERE id = $1
-          `,[decoded.classId])
-
-          if(classItem.rows.length >0 ){
-            try {
-                const classInsert = await poolean.query(`
-                INSERT INTO \"classesaccount\" (classid, accountid, type)
-                VALUES ($1, $2, $3)
-                RETURNING *
-                `,[decoded.classId,UserID,false])
-              res.status(200).json(classInsert.rows);
-              } catch (err) {
+            SELECT * 
+            FROM \"Classes\"
+            WHERE id = $1
+            `,[decoded.classId])
+    
+            if(classItem.rows.length >0 ){
+                try {
+                    const classInsert = await poolean.query(`
+                    INSERT INTO \"classesaccount\" (classid, accountid, type)
+                    VALUES ($1, $2, $3)
+                    RETURNING *
+                    `,[decoded.classId,UserID,false])
+                res.status(200).json(classInsert.rows);
+                } catch (err) {
+                    res.status(404).json({
+                    message: 'Something wrong in process'
+                    })
+                }    
+            }
+            else{
                 res.status(404).json({
-                  message: 'Recheck your submit information'
+                    message: 'The class with given ID was not found'
                 })
-            }    
-          }
-          else{
-            res.status(404).json({
-                message: 'The class with given ID was not found'
-            })
-          }
-         
-          } catch (err) {
+            }
+        } catch (err) {
             res.status(404).json({
               message: 'The class with given ID was not found'
             })
-         }
-    }
+        }
+    }     
+   
+  
 }
 
 
