@@ -36,8 +36,7 @@ exports.detail = async function (req, res) {
 
 exports.addClass = async function (req, res) {
   const classInfo = req.body;
-  console.log(classInfo)
-  console.log(uuidv4())
+ 
   try {
     const classItem = await poolean.query(`
     INSERT INTO \"Classes\" (id, name, section, subject, room)
@@ -53,8 +52,7 @@ exports.addClass = async function (req, res) {
 }
 exports.addClassesAccount = async function (req, res) {
   const classInfo = req.body;
-  console.log(classInfo)
-  console.log(uuidv4())
+
   try {
     const classItem = await poolean.query(`
     INSERT INTO classesaccount (classid, accountid, type)
