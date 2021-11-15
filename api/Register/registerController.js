@@ -23,6 +23,7 @@ exports.Register = async (req, res) => {
     RETURNING *
     `,[uuidv4(),req.username,req.password,null,req.dob,req.gender,req.username,req.phone,req.firstname,req.lastname])
   res.status(200).json({data:classItem.rows,success:true});
+    
   } catch (err) {
     res.status(404).json({
       message: 'Recheck your submit information'

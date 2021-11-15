@@ -58,7 +58,7 @@ opts.secretOrKey = process.env.JWT_SECRET;
 
 passport.use(
   new JwtStrategy(opts, function (jwt_payload, done) {
-
+    
     return done(null, { id: jwt_payload.id, username: jwt_payload.username },{ message: "Failed to get data" });
   })
 );
