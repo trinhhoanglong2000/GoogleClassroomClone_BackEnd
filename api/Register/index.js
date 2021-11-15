@@ -19,7 +19,7 @@ router.post(
         }
         if (!user) {
           res.status(401);
-          res.end(info.message);
+          res.send({message:info.message,success:false});
           return;
         }
         

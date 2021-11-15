@@ -12,7 +12,7 @@ exports.getAllClasses = async (req, res) => {
     // const classData = await poolean.query("SELECT * FROM classesaccount WHERE accountid=$1",[req.id])
 
     res.header({ "Access-Control-Allow-Origin": "*" });
-    res.status(200).json(data.rows);
+    res.status(200).json({data:data.rows,success:true});
     
   } catch (err) {
     res.header({ "Access-Control-Allow-Origin": "*" });
