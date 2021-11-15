@@ -68,10 +68,14 @@ function generateJWTByClassId (classId){
 // Dung de access vao lop hoc voi token tu CreateInviteLink
 //localhost:5000/mail/AccessInviteLink?accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGFzc0lkIjoiMmQ4NWI5MGUtNjRhZS00ZGI3LWI3YWItNjhiNDc5MDg2Y2E2IiwiaWF0IjoxNjM2ODg0OTM4LCJleHAiOjE2MzY4ODg1Mzh9.AzJJGJXspGBHCEpHQAVOBOAh-GFYKllVhTA-WHeeBsg&=
 exports.AccessInviteLink =async (req,res) =>{
+    
     var userData =null
     var authToken = null
+    console.log(req.headers)
+    console.log(req.query.accessToken)
     if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
         var authToken = req.headers.authorization.split(' ')[1];
+        
         try{
             userData = jwt.verify(authToken, process.env.JWT_SECRET);
         }catch(err){
@@ -92,7 +96,9 @@ exports.AccessInviteLink =async (req,res) =>{
     //Chứa classid và time hết hạn
     try{
         accessToken = jwt.verify(req.query.accessToken, process.env.INVITER_SECRET_TOKEN);
+      
     }catch(err){
+        console.log('Access Token Wrong')
         res.status(404).json({
             message: 'Access Token Wrong'
         })
@@ -103,7 +109,7 @@ exports.AccessInviteLink =async (req,res) =>{
         isExpiredToken = true;
     }
     if (isExpiredToken){
-        res.status(404).json("expired or wrong token");
+        res.status(404).json({message: "expired or wrong token"});
     }else{
         try {
             const classItem = await poolean.query(`
@@ -111,15 +117,31 @@ exports.AccessInviteLink =async (req,res) =>{
             FROM \"Classes\"
             WHERE id = $1
             `,[accessToken.classId])
-    
+            
             if(classItem.rows.length >0 ){
+                try {
+                const Joined =await poolean.query(`
+                SELECT * 
+                FROM \"classesaccount\"
+                WHERE classid = $1 AND accountid = $2 
+                `,[accessToken.classId, UserID])
+                if (Joined.rows.length > 0){
+                    res.status(200).json({message: 'You already in this class'});
+                }
+                }
+                catch(err) {
+                    res.status(404).json({
+                    message: 'Something wrong in process'
+                    })
+                }    
                 try {
                     const classInsert = await poolean.query(`
                     INSERT INTO \"classesaccount\" (classid, accountid, type)
                     VALUES ($1, $2, $3)
                     RETURNING *
                     `,[accessToken.classId,UserID,false])
-                res.status(200).json(classInsert.rows);
+                
+                res.status(200).json({message: 'Successful'});
                 } catch (err) {
                     res.status(404).json({
                     message: 'Something wrong in process'
