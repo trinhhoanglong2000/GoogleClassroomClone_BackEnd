@@ -4,12 +4,15 @@ const { v4: uuidv4 } = require('uuid');
 const classService = require("./classService");
 
 exports.getAllClasses = async (req, res) => {
-  console.log(uuidv4())
+  console.log(req)
   try {
-    
-    const allData = await poolean.query("SELECT * FROM \"Classes\"")
+    const data =await poolean.query("SELECT * FROM (\"Classes\" INNER JOIN classesaccount ON (classesaccount.accountid=$1 AND \"Classes\".id=classesaccount.classid)) ",[req.id] )
+    console.log(data.rows)
+    // const allData = await poolean.query("SELECT * FROM \"Classes\"")
+    // const classData = await poolean.query("SELECT * FROM classesaccount WHERE accountid=$1",[req.id])
+
     res.header({ "Access-Control-Allow-Origin": "*" });
-    res.status(200).json(allData.rows);
+    res.status(200).json(data.rows);
     
   } catch (err) {
     res.header({ "Access-Control-Allow-Origin": "*" });

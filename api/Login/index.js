@@ -18,8 +18,9 @@ router.post(
           return next(err);
         }
         if (!user) {
+          res.header({ "Access-Control-Allow-Origin": "*" });
           res.status(401);
-          res.end(info.message);
+          res.send({message:info.message,success:false});
           return;
         }
         

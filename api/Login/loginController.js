@@ -13,7 +13,7 @@ exports.getUserName = async (username) => {
   }
 };
 exports.Login = (req, res) => {
-  
+  res.header({ "Access-Control-Allow-Origin": "*" });
   res.json({
     success: true,
     id:req.id,
