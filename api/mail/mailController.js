@@ -1,9 +1,14 @@
 const nodemailer =  require('nodemailer');
 const jwt = require('jsonwebtoken');
 const poolean = require('../../Database/index.js');
-exports.SendMail = (req, res) =>
+exports.SendMail = async (req, res) =>
 {
     var ClassID = req.query.classid;
+    var mails = req.query.mails;
+    
+    console.log(mailArr)
+    console.log(ClassID)
+    console.log(mails)
     //2d85b90e-64ae-4db7-b7ab-68b479086ca6
     const classItem = await poolean.query(`
     SELECT * 
@@ -12,46 +17,47 @@ exports.SendMail = (req, res) =>
     `,[ClassID])
     if (classItem.rows.length==0){
         res.status(404).json({messange: 'This classes not found'})
+    }else{
+        const JWS = generateJWTByClassId(ClassID);
+        const className = classItem.rows[0].name
+        const destMail = mails;
+        const link= "localhost:3000/AccessInviteLink?accessToken=" + JWS;
+        let transporter = nodemailer.createTransport(
+        {
+            host: "smtp.gmail.com",
+            port: 587,
+            secure: false, 
+             auth: 
+            {
+            user: process.env.MAIL_USER,
+            pass: process.env.MAIL_PASSWORD, 
+            },
+            tls: 
+            {
+                 rejectUnauthorized: false
+            }
+        });
+        var mainOptions = {
+            from: '"TripleLAcademic" <triplelacademic@gmail.com>',
+            to: destMail, 
+            subject: "You have an invite to join "+ className +" class", 
+            text: "",
+            html:"<b>You have an invite to join"+ className +" class</b><br/>"
+                +"<p>Click the link below for accept and join<p/><br/>"
+                +`<a href="${link}">`+className+'<a/><br/>'
+        }
+          // send mail with defined transport object
+        transporter.sendMail(mainOptions, function(err){
+            if (err) {
+                console.log(err);
+                res.status(404).json({message: 'Lỗi'});
+            } else {
+                res.status(200).json({message:'Thành công'});
+            }
+        });
     }
 
-    const JWS = generateJWTByClassId(ClassID);
-  
-    const className = classItem.rows[0].name
-    const destMail = "ttlgame123@gmail.comnpm, longbinkg@gmail.com"
-    const link= "localhost:3000/AccessInviteLink?accessToken=" + JWS;
-    let transporter = nodemailer.createTransport(
-    {
-        host: "smtp.gmail.com",
-        port: 587,
-        secure: false, 
-         auth: 
-        {
-        user: process.env.MAIL_USER,
-        pass: process.env.MAIL_PASSWORD, 
-        },
-        tls: 
-        {
-             rejectUnauthorized: false
-        }
-    });
-    var mainOptions = {
-        from: '"TripleLAcademic" <triplelacademic@gmail.com>',
-        to: destMail, 
-        subject: "You have an invite to join "+ className +" class", 
-        text: "",
-        html:"<b>You have an invite to join"+ className +" class</b><br/>"
-            +"<p>Click the link below for accept and join<p/><br/>"
-            +'<a href="https://youtu.be/BWeg2GEhAMo">'+className+'<a/><br/>'
-    }
-      // send mail with defined transport object
-    transporter.sendMail(mainOptions, function(err){
-        if (err) {
-            console.log(err);
-            res.status(404).json('Lỗi');
-        } else {
-            res.status(200).json('Thành công');
-        }
-    });
+    
 }
 
 //Trả về cái giá trị cho query accessToken với class 
