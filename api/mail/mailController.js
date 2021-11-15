@@ -47,7 +47,7 @@ exports.SendMail = (req, res) =>
 exports.CreateInviteLink = (req,res) => {
     const JWS = generateJWTByClassId("2d85b90e-64ae-4db7-b7ab-68b479086ca6");
     if (JWS){
-        res.status(200).json("localhost:5000/mail/AccessInviteLink?accessToken=" + JWS)
+        res.status(200).json("localhost:3000/AccessInviteLink?accessToken=" + JWS)
     }else{
         res.status(404).json("Error")
     }
