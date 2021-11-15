@@ -1,13 +1,24 @@
 const nodemailer =  require('nodemailer');
 const jwt = require('jsonwebtoken');
-const jwt_decode = require("jwt-decode"); 
 const poolean = require('../../Database/index.js');
-const { token } = require('morgan');
 exports.SendMail = (req, res) =>
 {
-    const className = "KungFu"
+    var ClassID = req.query.classid;
+    //2d85b90e-64ae-4db7-b7ab-68b479086ca6
+    const classItem = await poolean.query(`
+    SELECT * 
+    FROM \"Classes\"
+    WHERE id = $1
+    `,[ClassID])
+    if (classItem.rows.length==0){
+        res.status(404).json({messange: 'This classes not found'})
+    }
+
+    const JWS = generateJWTByClassId(ClassID);
+  
+    const className = classItem.rows[0].name
     const destMail = "ttlgame123@gmail.comnpm, longbinkg@gmail.com"
-    const link= "https://youtu.be/BWeg2GEhAMo";
+    const link= "localhost:3000/AccessInviteLink?accessToken=" + JWS;
     let transporter = nodemailer.createTransport(
     {
         host: "smtp.gmail.com",
@@ -44,16 +55,27 @@ exports.SendMail = (req, res) =>
 }
 
 //Trả về cái giá trị cho query accessToken với class 
-exports.CreateInviteLink = (req,res) => {
-    const JWS = generateJWTByClassId("2d85b90e-64ae-4db7-b7ab-68b479086ca6");
+exports.CreateInviteLink =async (req,res) => {
+    var ClassID = req.query.classid;
+    //2d85b90e-64ae-4db7-b7ab-68b479086ca6
+    const classItem = await poolean.query(`
+    SELECT * 
+    FROM \"Classes\"
+    WHERE id = $1
+    `,[ClassID])
+    if (classItem.rows.length==0){
+        res.status(404).json({messange: 'This classes not found'})
+    }
+
+    const JWS = generateJWTByClassId(ClassID);
     if (JWS){
-        res.status(200).json("localhost:3000/AccessInviteLink?accessToken=" + JWS)
+        res.status(200).json({link : "localhost:3000/AccessInviteLink?accessToken=" + JWS,token : JWS, classInfo: classItem.rows[0]} )
     }else{
-        res.status(404).json("Error")
+        res.status(404).json({messange: 'Error'})
     }
     
 }
-function generateJWTByClassId (classId){
+function generateJWTByClassId ( classId){
     var JWT = null;
     try {
         JWT = jwt.sign({classId:classId}, process.env.INVITER_SECRET_TOKEN, { expiresIn: '1d' });
@@ -117,32 +139,32 @@ exports.AccessInviteLink =async (req,res) =>{
             FROM \"Classes\"
             WHERE id = $1
             `,[accessToken.classId])
-            
             if(classItem.rows.length >0 ){
                 try {
-                const Joined =await poolean.query(`
-                SELECT * 
-                FROM \"classesaccount\"
-                WHERE classid = $1 AND accountid = $2 
-                `,[accessToken.classId, UserID])
-                if (Joined.rows.length > 0){
-                    res.status(200).json({message: 'You already in this class'});
-                }
+                    const Joined =await poolean.query(`
+                    SELECT * 
+                    FROM \"classesaccount\"
+                    WHERE classid = $1 AND accountid = $2 
+                    `,[accessToken.classId, UserID])
+                    if (Joined.rows.length > 0){
+                        res.status(200).json({message: 'You already in this class'});
+                    }else{
+                        try {
+                            const classInsert = await poolean.query(`
+                            INSERT INTO \"classesaccount\" (classid, accountid, type)
+                            VALUES ($1, $2, $3)
+                            RETURNING *
+                            `,[accessToken.classId,UserID,false])
+                        
+                        res.status(200).json({message: 'Successful'});
+                        } catch (err) {
+                            res.status(404).json({
+                            message: 'Something wrong in process'
+                            })
+                        }    
+                    }
                 }
                 catch(err) {
-                    res.status(404).json({
-                    message: 'Something wrong in process'
-                    })
-                }    
-                try {
-                    const classInsert = await poolean.query(`
-                    INSERT INTO \"classesaccount\" (classid, accountid, type)
-                    VALUES ($1, $2, $3)
-                    RETURNING *
-                    `,[accessToken.classId,UserID,false])
-                
-                res.status(200).json({message: 'Successful'});
-                } catch (err) {
                     res.status(404).json({
                     message: 'Something wrong in process'
                     })
