@@ -16,9 +16,7 @@ exports.loginValidation=(data)=>{
         password:Joi.string().min(6).required()
     });
     return schema.validate(data)
-    
-   
-    
+
 }
 exports.registerValidation=(data)=>{
     const schema =Joi.object({
@@ -32,7 +30,5 @@ exports.registerValidation=(data)=>{
         phone:Joi.string().messages({'string.pattern.base': `Invalid phone number.`}).length(10).pattern(/^[0-9]+$/).required(),
     });
     return schema.validate(data)
-    
-   
     
 }
