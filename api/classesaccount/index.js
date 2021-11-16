@@ -21,7 +21,7 @@ router.get("/:id", function (req, res, next) {
           res.send({ message: info.message, success: false });
           return;
         }
-        classesaccountController.GetAllAccount(req, res);
+        classesaccountController.GetAllAccount(req, res,user);
       }
     )(req, res, next);
   });
