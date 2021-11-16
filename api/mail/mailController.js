@@ -21,7 +21,7 @@ exports.SendMail = async (req, res) =>
         const JWS = generateJWTByClassId(ClassID, isTeacherInvite);
         const className = classItem.rows[0].name
         const destMail = mails;
-        const link= "localhost:3000/AccessInviteLink?accessToken=" + JWS;
+        const link= "http://localhost:3000/AccessInviteLink?accessToken=" + JWS;
         let transporter = nodemailer.createTransport(
         {
             host: "smtp.gmail.com",
@@ -42,8 +42,8 @@ exports.SendMail = async (req, res) =>
             to: destMail, 
             subject: "You have an invite to join "+ className +" class", 
             text: "",
-            html:"<b>You have an invite to join"+ className +" class as a "+ isTeacherInvite?"Teacher" :"Student" +"</b><br/>"
-                +"<p>Click the link below for accept and join<p/><br/>"
+            html:"<b>You have an invite to join "+ className +" class as a "+ (isTeacherInvite?"Teacher" :"Student") +"</b><br/>"
+                +"<p>Click the link below for accept and join class: <p/>"
                 +`<a href="${link}">`+className+'<a/><br/>'
         }
           // send mail with defined transport object
