@@ -14,6 +14,7 @@ const mailRouter = require('./api/mail');
 const loginRouter = require('./api/Login');
 const registerRouter = require('./api/Register');
 const classesaccountRouter = require('./api/classesaccount');
+const accountRouter = require('./api/Account');
 
 const app = express();
 app.use(passport.initialize());
@@ -35,6 +36,7 @@ app.use('/mail', mailRouter);
 app.use('/login',loginRouter);
 app.use('/register',registerRouter);
 app.use('/classesaccount',classesaccountRouter);
+app.use('/Account',accountRouter);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
