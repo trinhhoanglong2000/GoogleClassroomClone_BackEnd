@@ -1,14 +1,19 @@
 const jwt = require("jsonwebtoken");
 const poolean = require("../../Database/index.js");
 const validation = require("../../authentication/validation");
+const { v4: uuidv4 } = require("uuid");
+
 exports.getUserName = async (username) => {
   try {
-    const classItem = await poolean.query(`
+    const classItem = await poolean.query(
+      `
   SELECT * 
   FROM \"Account\"
   WHERE username = $1
-  `, [username])
-    return classItem
+  `,
+      [username]
+    );
+    return classItem;
   } catch (err) {
     return null;
   }
@@ -33,56 +38,85 @@ exports.Login = (req, res) => {
 };
 exports.LoginGoogle = async (req, res) => {
   var tokenid = req.query.tokenId;
-  var Data = await validation.GGverify(tokenid)
+  var Data = await validation.GGverify(tokenid);
   if (!Data) {
-    res.json({ messenge: "Login fail" })
+    res.json({ messenge: "Login fail" });
   } else {
     //# Lay du lieu theo email
     try {
       //# Kiem tra xem gg_id co trong db khong
-      var Account = await poolean.query(`
+      var Account = await poolean.query(
+        `
     SELECT * 
     FROM \"Account\"
     WHERE gg_id = $1
-    `, [Data.sub])
+    `,
+        [Data.sub]
+      );
       //# neu khong co tra xem email  co trong db khong
       if (Account.rows.length == 0) {
         try {
-          Account = await poolean.query(`
+          Account = await poolean.query(
+            `
             SELECT * 
             FROM \"Account\"
             WHERE email = $1
-            `, [Data.email])
+            `,
+            [Data.email]
+          );
           //Neu khong co thi tao 1 row moi roi tra ve thanh cong
           if (Account.rows.length == 0) {
-            Account = await poolean.query(`
-              INSERT INTO \"Account\" (id, username, password,img, dob, gender,email,phone,firstname,lastname,gg_id)
-              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+            try {
+              Account = await poolean.query(
+                `
+              INSERT INTO \"Account\" (id, username, password,img, dob, gender,email,phone,firstname,lastname,gg_id,fb_id)
+              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11,$12)
               RETURNING *
-              `, [uuidv4(), Data.email, null, Data.picture, null, null, Data.email, null, Data.given_name, Data.family_name, Data.sub])
-            res.header({ "Access-Control-Allow-Origin": "*" });
-            res.json({
-              success: true,
-              id: Account.rows[0].id,
-              user: Account.rows[0].username,
-              token: jwt.sign(
-                {
-                  id: Account.rows[0].id,
-                  username: req.username,
-                },
-                process.env.JWT_SECRET,
-                {
-                  expiresIn: "1h",
-                }
-              ),
-            });
+              `,
+                [
+                  uuidv4(),
+                  Data.email,
+                  null,
+                  Data.picture,
+                  null,
+                  null,
+                  Data.email,
+                  null,
+                  Data.given_name,
+                  Data.family_name,
+                  Data.sub,
+                  null,
+                ]
+              );
+              res.header({ "Access-Control-Allow-Origin": "*" });
+              res.json({
+                success: true,
+                id: Account.rows[0].id,
+                user: Account.rows[0].username,
+                token: jwt.sign(
+                  {
+                    id: Account.rows[0].id,
+                    username: req.username,
+                  },
+                  process.env.JWT_SECRET,
+                  {
+                    expiresIn: "1h",
+                  }
+                ),
+              });
+            } catch (err) {
+              console.log(err);
+            }
           } else {
             // Neu  co thi them gg_id vao roi tra ve res co JWT
-            await poolean.query(`
+            await poolean.query(
+              `
               UPDATE \"Account\"
               SET gg_id = $1
               WHERE email = $2
-              `, [Data.sub, Data.email])
+              `,
+              [Data.sub, Data.email]
+            );
             res.header({ "Access-Control-Allow-Origin": "*" });
             res.json({
               success: true,
@@ -100,9 +134,8 @@ exports.LoginGoogle = async (req, res) => {
               ),
             });
           }
-
         } catch (err) {
-          res.json({ messenge: "Error processing" })
+          res.json({ messenge: "Error processing" });
         }
       } else {
         // Neu  co tra ve res co JWT
@@ -123,9 +156,8 @@ exports.LoginGoogle = async (req, res) => {
           ),
         });
       }
-    }
-    catch (err) {
-      res.json({ messenge: "Error processing" })
+    } catch (err) {
+      res.json({ messenge: "Error 123" });
     }
   }
 };

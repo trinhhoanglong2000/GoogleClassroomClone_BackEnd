@@ -22,7 +22,7 @@ exports.SendMail = async (req, res) =>
         const JWS = generateJWTByClassId(ClassID, isTeacherInvite);
         const className = classItem.rows[0].name
         const destMail = mails;
-        const link= "http://localhost:3000/AccessInviteLink?accessToken=" + JWS;
+        const link= `${process.env.CLIENT_URL}/AccessInviteLink?accessToken=${JWS}`;
         let transporter = nodemailer.createTransport(
         {
             host: "smtp.gmail.com",
@@ -78,7 +78,7 @@ exports.CreateInviteLink =async (req,res) => {
 
     const JWS = generateJWTByClassId(ClassID, isTeacherInvite);
     if (JWS){
-        res.status(200).json({link : "localhost:3000/AccessInviteLink?accessToken=" + JWS,token : JWS, classInfo: classItem.rows[0]} )
+        res.status(200).json({link : `${process.env.CLIENT_URL}/AccessInviteLink?accessToken=${JWS}`,token : JWS, classInfo: classItem.rows[0]} )
     }else{
         res.status(404).json({messange: 'Error'})
     }
