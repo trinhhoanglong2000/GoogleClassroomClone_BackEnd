@@ -1,6 +1,7 @@
 const nodemailer =  require('nodemailer');
 const jwt = require('jsonwebtoken');
 const poolean = require('../../Database/index.js');
+
 exports.SendMail = async (req, res) =>
 {
     var ClassID = req.query.classid;

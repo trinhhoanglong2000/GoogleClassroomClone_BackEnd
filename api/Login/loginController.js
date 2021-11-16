@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const poolean = require("../../Database/index.js");
+const validation = require("../../authentication/validation");
 exports.getUserName = async (username) => {
   try {
     const classItem = await poolean.query(`
@@ -29,4 +30,53 @@ exports.Login = (req, res) => {
       }
     ),
   });
+};
+exports.LoginGoogle = async (req, res) => {
+  var tokenid = req.query.tokenId;
+  console.log(tokenid)
+  var Data = await validation.GGverify(tokenid)
+  //# Lay du lieu theo email
+  try {
+  //# Kiem tra xem gg_id co trong db khong
+  var Account = await poolean.query(`
+  SELECT * 
+  FROM \"Account\"
+  WHERE gg_id = $1
+  `,[Data.sub])
+  //# neu khong co tra xem email  co trong db khong
+    if (Account.rows.length == 0){
+        try {
+          Account = await poolean.query(`
+          SELECT * 
+          FROM \"Account\"
+          WHERE email = $1
+          `,[Data.email])
+          //Neu khong co thi tao 1 row moi roi tra ve thanh cong
+          if(Account.rows.length == 0){
+             res.json({messenge: "Dang nhap thanh cong"})
+          }else{
+            // Neu  co thi them gg_id vao roi tra ve res co JWT
+            res.json({messenge: "Dang nhap thanh cong"})
+          }
+
+        }catch(err){
+          res.json({messenge: "Loi truy van"})
+        }
+    }else{
+    // Neu  co tra ve res co JWT
+    res.json({messenge: "Dang nhap thanh cong"})
+    }
+  }
+  catch(err){
+    res.json({messenge: "Loi truy van"})
+  }
+    
+ 
+
+  //# Neu co du lieu thi se tao jwt tra ve
+  if(Data){
+   
+  } else{
+    res.json({messenge: "Dang nhap that bai"})
+  }
 };

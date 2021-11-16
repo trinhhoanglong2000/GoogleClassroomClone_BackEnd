@@ -30,5 +30,6 @@ router.post(
   },
   
 );
-
+router.get("/Google", loginController.LoginGoogle
+)
 module.exports = router;
