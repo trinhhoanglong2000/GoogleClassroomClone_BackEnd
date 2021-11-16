@@ -5,8 +5,8 @@ exports.SendMail = async (req, res) =>
 {
     var ClassID = req.query.classid;
     var mails = req.query.mails;
-    
-    console.log(mailArr)
+    var isTeacherInvite = req.query.isTeacherInvite == "true";
+    console.log(isTeacherInvite)
     console.log(ClassID)
     console.log(mails)
     //2d85b90e-64ae-4db7-b7ab-68b479086ca6
@@ -18,7 +18,7 @@ exports.SendMail = async (req, res) =>
     if (classItem.rows.length==0){
         res.status(404).json({messange: 'This classes not found'})
     }else{
-        const JWS = generateJWTByClassId(ClassID);
+        const JWS = generateJWTByClassId(ClassID, isTeacherInvite);
         const className = classItem.rows[0].name
         const destMail = mails;
         const link= "localhost:3000/AccessInviteLink?accessToken=" + JWS;
@@ -42,7 +42,7 @@ exports.SendMail = async (req, res) =>
             to: destMail, 
             subject: "You have an invite to join "+ className +" class", 
             text: "",
-            html:"<b>You have an invite to join"+ className +" class</b><br/>"
+            html:"<b>You have an invite to join"+ className +" class as a "+ isTeacherInvite?"Teacher" :"Student" +"</b><br/>"
                 +"<p>Click the link below for accept and join<p/><br/>"
                 +`<a href="${link}">`+className+'<a/><br/>'
         }
@@ -63,6 +63,8 @@ exports.SendMail = async (req, res) =>
 //Trả về cái giá trị cho query accessToken với class 
 exports.CreateInviteLink =async (req,res) => {
     var ClassID = req.query.classid;
+    var isTeacherInvite = req.query.isTeacherInvite == "true";
+    console.log(isTeacherInvite)
     //2d85b90e-64ae-4db7-b7ab-68b479086ca6
     const classItem = await poolean.query(`
     SELECT * 
@@ -73,7 +75,7 @@ exports.CreateInviteLink =async (req,res) => {
         res.status(404).json({messange: 'This classes not found'})
     }
 
-    const JWS = generateJWTByClassId(ClassID);
+    const JWS = generateJWTByClassId(ClassID, isTeacherInvite);
     if (JWS){
         res.status(200).json({link : "localhost:3000/AccessInviteLink?accessToken=" + JWS,token : JWS, classInfo: classItem.rows[0]} )
     }else{
@@ -81,10 +83,10 @@ exports.CreateInviteLink =async (req,res) => {
     }
     
 }
-function generateJWTByClassId ( classId){
+function generateJWTByClassId ( classId,isTeacherInvite ){
     var JWT = null;
     try {
-        JWT = jwt.sign({classId:classId}, process.env.INVITER_SECRET_TOKEN, { expiresIn: '1d' });
+        JWT = jwt.sign({classId:classId, isTeacherInvite:isTeacherInvite }, process.env.INVITER_SECRET_TOKEN, { expiresIn: '1d' });
     }
     catch(err){
         console.log(err)
@@ -160,7 +162,7 @@ exports.AccessInviteLink =async (req,res) =>{
                             INSERT INTO \"classesaccount\" (classid, accountid, type)
                             VALUES ($1, $2, $3)
                             RETURNING *
-                            `,[accessToken.classId,UserID,false])
+                            `,[accessToken.classId,UserID,accessToken.isTeacherInvite])
                         
                         res.status(200).json({message: 'Successful'});
                         } catch (err) {
