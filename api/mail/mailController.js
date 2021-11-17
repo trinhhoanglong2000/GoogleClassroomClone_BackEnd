@@ -101,7 +101,7 @@ exports.SendMail = async (req, res) => {
         "</b><br/>" +
         "<p>Click the link below for accept and join class: <p/>" +
         `<a href="${link}">` +
-        className +
+        link +
         "<a/><br/>",
     };
     // send mail with defined transport object
