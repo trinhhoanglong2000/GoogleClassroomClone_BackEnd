@@ -56,6 +56,7 @@ exports.LoginGoogle = async (req, res) => {
       //# neu khong co tra xem email  co trong db khong
       if (Account.rows.length == 0) {
         try {
+          
           Account = await poolean.query(
             `
             SELECT * 
@@ -64,13 +65,14 @@ exports.LoginGoogle = async (req, res) => {
             `,
             [Data.email]
           );
+         
           //Neu khong co thi tao 1 row moi roi tra ve thanh cong
           if (Account.rows.length == 0) {
             try {
               Account = await poolean.query(
                 `
-              INSERT INTO \"Account\" (id, username, password,img, dob, gender,email,phone,firstname,lastname,gg_id,fb_id)
-              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11,$12)
+              INSERT INTO \"Account\" (id, username, password,img, dob, gender,email,phone,firstname,lastname,gg_id,fb_id,student_id)
+              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11,$12,$13)
               RETURNING *
               `,
                 [
@@ -85,6 +87,7 @@ exports.LoginGoogle = async (req, res) => {
                   Data.given_name,
                   Data.family_name,
                   Data.sub,
+                  null,
                   null,
                 ]
               );

@@ -29,6 +29,7 @@ passport.use(
   })
 );
 
+
 passport.use(
   new LocalStrategy(async function (username, password, done) {
     //Validation the data
