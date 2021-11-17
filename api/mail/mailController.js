@@ -63,9 +63,27 @@ exports.SendMail = async (req, res) =>
 
 //Trả về cái giá trị cho query accessToken với class 
 exports.CreateInviteLink =async (req,res) => {
-    var ClassID = req.query.classid;
-    var isTeacherInvite = req.query.isTeacherInvite == "true";
+    let userData =null
+    if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
+        var authToken = req.headers.authorization.split(' ')[1];
+        try{
+            userData = jwt.verify(authToken, process.env.JWT_SECRET);
+        }catch(err){
+            res.status(404).json({
+                message: 'User not valid'
+            })
+        }
+    }
+    else{
+        res.status(404).json({
+            message: 'User not valid'
+        })
+    }
+    try {
+    let ClassID = req.query.classid;
+    let isTeacherInvite = req.query.isTeacherInvite == "true";
     console.log(isTeacherInvite)
+    
     //2d85b90e-64ae-4db7-b7ab-68b479086ca6
     const classItem = await poolean.query(`
     SELECT * 
@@ -75,13 +93,28 @@ exports.CreateInviteLink =async (req,res) => {
     if (classItem.rows.length==0){
         res.status(404).json({messange: 'This classes not found'})
     }
+    let isTeacher =await poolean.query(`
+    SELECT * 
+    FROM \"classesaccount\"
+    WHERE classid = $1 AND accountid = $2 AND type = true
+    `,[ClassID, userData.id])
 
-    const JWS = generateJWTByClassId(ClassID, isTeacherInvite);
-    if (JWS){
-        res.status(200).json({link : `${process.env.CLIENT_URL}/AccessInviteLink?accessToken=${JWS}`,token : JWS, classInfo: classItem.rows[0]} )
+    if (isTeacher.rows.length==0){
+        res.status(404).json({messange: 'Only teacer can invite'})
     }else{
-        res.status(404).json({messange: 'Error'})
+        const JWS = generateJWTByClassId(ClassID, isTeacherInvite);
+        if (JWS){
+            res.status(200).json({link : `${process.env.CLIENT_URL}/AccessInviteLink?accessToken=${JWS}`,token : JWS, classInfo: classItem.rows[0]} )
+        }else{
+            res.status(404).json({messange: 'Error'})
+        }
     }
+    }catch(err){
+        res.status(404).json({
+            message: 'User not valid'
+        })
+    }
+    
     
 }
 function generateJWTByClassId ( classId,isTeacherInvite ){
