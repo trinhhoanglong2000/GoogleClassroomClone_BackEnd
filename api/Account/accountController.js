@@ -41,7 +41,7 @@ exports.updateUser = async (req, res) => {
     );
 
     res.header({ "Access-Control-Allow-Origin": "*" });
-    res.status(200).json({ data: data.rows, success: true });
+    res.status(201).json({ data: data.rows, success: true });
   } catch (err) {
     res.header({ "Access-Control-Allow-Origin": "*" });
     res.status(404).json({

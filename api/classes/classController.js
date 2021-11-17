@@ -67,7 +67,7 @@ exports.addClass = async function (req, res) {
     `,
     [classid, classInfo.userid, true]
     );
-    res.status(200).json({ data: classItem.rows, success: true });
+    res.status(201).json({ data: classItem.rows, success: true });
   } catch (err) {
     res.status(404).json({
       message: "Recheck your submit information",
@@ -86,7 +86,7 @@ exports.addClassesAccount = async function (req, res) {
     `,
       [classInfo.classId, classInfo.accountId, classInfo.type]
     );
-    res.status(200).json(classItem.rows);
+    res.status(201).json(classItem.rows);
   } catch (err) {
     res.status(404).json({
       message: "Recheck your submit information",
