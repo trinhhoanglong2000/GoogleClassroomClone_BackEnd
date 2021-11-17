@@ -4,6 +4,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const cors = require('cors')
+const { v4: uuidv4 } = require("uuid");
 
 require('dotenv').config()
 passport = require('./authentication/index')
@@ -15,11 +16,12 @@ const loginRouter = require('./api/Login');
 const registerRouter = require('./api/Register');
 const classesaccountRouter = require('./api/classesaccount');
 const accountRouter = require('./api/Account');
-
+const gradeRouter = require('./api/Grade');
 const app = express();
 app.use(passport.initialize());
 
 // view engine setup
+//console.log(uuidv4())
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
@@ -37,6 +39,7 @@ app.use('/login',loginRouter);
 app.use('/register',registerRouter);
 app.use('/classesaccount',classesaccountRouter);
 app.use('/Account',accountRouter);
+app.use('/Grade',gradeRouter)
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
